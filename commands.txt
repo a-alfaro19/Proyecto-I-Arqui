@@ -1,0 +1,27 @@
+#compilar aplicacion
+
+riscv64-unknown-elf-gcc -march=rv32im -mabi=ilp32 \
+    -nostdlib -ffreestanding -g test.s -T linker.ld -o test.elf
+
+
+#Run qemu
+
+qemu-system-riscv32 -machine virt -nographic -bios none -kernel test.elf -S -gdb tcp::1234
+in another tab:
+docker exec -it rvqemu bash
+(then Inside)
+
+# Connect to your QEMU RV64 instance
+gdb-multiarch test.elf
+
+# Inside gdb:
+(gdb) target remote :1234
+(gdb) layout asm      # optional
+(gdb) layout regs
+(gdb) break _start
+(gdb) continue
+(gdb) n
+(seguir apretando n)
+
+al final:
+monitor quit
