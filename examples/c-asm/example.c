@@ -44,7 +44,7 @@ void print_string(const char* str) {
 }
 
 // Entry point for C program
-void _start() {
+void main() {
     // Test the assembly function with different values
     int test_values[] = {5, 10, 15, 0, -1};
     int num_tests = 5;

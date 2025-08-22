@@ -9,7 +9,8 @@ riscv64-unknown-elf-gcc \
     -mabi=ilp32 \
     -nostdlib \
     -ffreestanding \
-    -g \
+    -g3 \
+    -gdwarf-4 \
     -c \
     example.c \
     -o example.o
@@ -19,19 +20,37 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Compile assembly source to object file
+# Compile startup assembly to object file
 riscv64-unknown-elf-gcc \
     -march=rv32im \
     -mabi=ilp32 \
     -nostdlib \
     -ffreestanding \
-    -g \
+    -g3 \
+    -gdwarf-4 \
+    -c \
+    startup.s \
+    -o startup.o
+
+if [ $? -ne 0 ]; then
+    echo "Startup assembly compilation failed"
+    exit 1
+fi
+
+# Compile math assembly source to object file
+riscv64-unknown-elf-gcc \
+    -march=rv32im \
+    -mabi=ilp32 \
+    -nostdlib \
+    -ffreestanding \
+    -g3 \
+    -gdwarf-4 \
     -c \
     math_asm.s \
     -o math_asm.o
 
 if [ $? -ne 0 ]; then
-    echo "Assembly compilation failed"
+    echo "Math assembly compilation failed"
     exit 1
 fi
 
@@ -41,7 +60,9 @@ riscv64-unknown-elf-gcc \
     -mabi=ilp32 \
     -nostdlib \
     -ffreestanding \
-    -g \
+    -g3 \
+    -gdwarf-4 \
+    startup.o \
     example.o \
     math_asm.o \
     -T linker.ld \

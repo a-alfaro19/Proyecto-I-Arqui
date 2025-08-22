@@ -10,14 +10,13 @@ Este proyecto proporciona un entorno completo para desarrollo y depuración de p
 .
 ├── Dockerfile
 ├── run.sh
-├── workspace/          # Directorio de trabajo (legacy)
 ├── examples/           # Ejemplos de código
-│   ├── asm-only/      # Ejemplo de assembly puro
+│   ├── asm-only/      # Ejemplo de ensamblador puro
 │   │   ├── test.s
 │   │   ├── linker.ld
 │   │   ├── build.sh
 │   │   └── run-qemu.sh
-│   └── c-asm/         # Ejemplo de C + assembly
+│   └── c-asm/         # Ejemplo de C + ensamblador
 │       ├── example.c
 │       ├── math_asm.s
 │       ├── linker.ld
@@ -32,11 +31,11 @@ Este proyecto proporciona un entorno completo para desarrollo y depuración de p
 
 ## Ejemplos disponibles
 
-### Assembly puro (`examples/asm-only/`)
+### Ensamblador puro (`examples/asm-only/`)
 Programa simple escrito completamente en ensamblador que calcula la suma del 1 al 10.
 
-### C + Assembly (`examples/c-asm/`)
-Programa en C que llama funciones escritas en ensamblador, demostrando la integración entre ambos lenguajes.
+### C + Ensamblador (`examples/c-asm/`)
+Programa en C que llama funciones escritas en ensamblador, demostrando la integración entre ambos lenguajes. Este ejemplo incluye un archivo de inicio (startup.s) que inicializa la pila y llama a la función main de C, ya que los programas C necesitan un entorno de ejecución básico antes de ejecutar el código principal.
 
 ---
 
@@ -50,11 +49,11 @@ chmod +x run.sh
 
 ### Paso 2: Elegir y compilar un ejemplo
 ```bash
-# Para el ejemplo de assembly puro
+# Para el ejemplo de ensamblador puro
 cd /home/rvqemu-dev/workspace/examples/asm-only
 ./build.sh
 
-# Para el ejemplo de C + assembly
+# Para el ejemplo de C + ensamblador
 cd /home/rvqemu-dev/workspace/examples/c-asm
 ./build.sh
 ```
@@ -107,6 +106,6 @@ monitor quit           # Finalizar sesión
 ## 4. Detalles de los ejemplos
 
 Para información específica sobre cada ejemplo, consultar:
-- [`examples/asm-only/README.md`](examples/asm-only/README.md) - Assembly puro
-- [`examples/c-asm/README.md`](examples/c-asm/README.md) - C + Assembly
+- [`examples/asm-only/README.md`](examples/asm-only/README.md) - Ensamblador puro
+- [`examples/c-asm/README.md`](examples/c-asm/README.md) - C + Ensamblador
 - [`examples/README.md`](examples/README.md) - Información general
