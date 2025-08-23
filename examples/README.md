@@ -39,4 +39,5 @@ step                   # Ejecutar siguiente instrucción
 info registers         # Mostrar registros
 layout asm             # Vista de ensamblador
 layout regs            # Vista de registros
+monitor quit           # Finalizar aplicación remota (qemu)
 ```
