@@ -40,6 +40,8 @@ continue
 layout asm
 layout regs
 step  # o 's' para ejecutar paso a paso
+monitor quit # para terminar la aplicación de qemu
+quit # para salir
 ```
 
 ## Registros importantes
