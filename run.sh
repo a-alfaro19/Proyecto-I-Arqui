@@ -18,13 +18,14 @@ HOST_USER=$(id -un)
 echo "Host user: $HOST_USER (UID: $HOST_UID, GID: $HOST_GID)"
 
 # Build the Docker image if it doesn't exist
-if [[ "$($CONTAINER_CMD images -q $IMAGE_NAME 2> /dev/null)" == "" ]]; then
+if [[ -z "$($CONTAINER_CMD images -q $IMAGE_NAME 2> /dev/null)" ]]; then
     echo "Building container image '$IMAGE_NAME'..."
     $CONTAINER_CMD build --tag $IMAGE_NAME \
         --build-arg UID="$HOST_UID" \
         --build-arg GID="$HOST_GID" \
         --build-arg USERNAME="rvqemu-dev" \
-        --build-arg CACHEBUST=$(date +%s) .
+        .
+        # --build-arg CACHEBUST=$(date +%s) .
 else
     echo "Container image '$IMAGE_NAME' already exists. Skipping build."
 fi
@@ -38,15 +39,16 @@ echo "Starting container '$IMAGE_NAME'..."
 if [[ "$CONTAINER_CMD" == "podman" ]]; then
     # Podman handles user namespaces better
     $CONTAINER_CMD run --rm -it --name rvqemu \
-        -v $(pwd):$VOLUME_MOUNT \
+        -v $(pwd):$VOLUME_MOUNT:z \
         --userns=keep-id \
         --workdir $VOLUME_MOUNT \
         $IMAGE_NAME /bin/bash
 else
     # Docker - run as the created user
     $CONTAINER_CMD run --rm -it --name rvqemu \
-        -v $(pwd):$VOLUME_MOUNT \
-        --user rvqemu-dev \
+        -v $(pwd):$VOLUME_MOUNT:z \
+        --user $HOST_UID:$HOST_GID \
+        # --user rvqemu-dev \
         --workdir $VOLUME_MOUNT \
         $IMAGE_NAME /bin/bash
 fi
