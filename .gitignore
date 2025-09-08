@@ -1,0 +1,27 @@
+# Compiled object files
+*.o
+*.object
+
+# Compiled binary executables
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Debug and profiling files
+*.gch
+*.pch
+*.log
+*.tmp
+
+# Build directories
+/build/
+/bin/
+
+# Other common generated files
+*.swp
+*~
+
+# VS Code
+/.vscode/
