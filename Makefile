@@ -26,6 +26,10 @@ $(OBJDIR):
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
+# Run program
+run:
+	$(OUT)
+
 # Remove all generated files and directories
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)

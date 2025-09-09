@@ -3,11 +3,62 @@
 #define WIDTH 1200
 #define HEIGHT 768
 
-static void on_combo_changed(GtkComboBoxText *combo, gpointer user_data) {
-  const char *option = gtk_combo_box_text_get_active_text(combo);
-  g_print("You choose the string: %s\n", option ? option : "None");
+
+uint64_t* string_to_blocks64(const char *str, size_t *out_blocks) {
+  // Calculate number of blocks
+  size_t str_len = strlen(str);
+  size_t n_blocks = str_len / 8;
+
+  // Reserve memory
+  uint64_t *blocks = malloc(n_blocks * sizeof(u_int64_t));
+
+  if (!blocks) {
+    *out_blocks = 0;
+    return NULL;
+  }
+
+  // Create blocks
+  for (size_t i = 0; i < n_blocks; i++) {
+    uint64_t block = 0;
+    for (int j = 0; j < 8; j++) {
+      block |= ((uint64_t)(uint8_t)str[i*8 + j]) << (j * 8);
+    }
+    blocks[i] = block;
+  }
+
+  // Set number of blocks
+  *out_blocks = n_blocks;
+
+  return blocks;
 }
 
+static void on_button_encrypt(GtkButton *btn, gpointer user_data) {
+  GtkComboBoxText *combo = GTK_COMBO_BOX_TEXT(user_data);
+  const char *msg = gtk_combo_box_text_get_active_text(combo);
+
+  if (!msg) {
+    g_print("No option selected!\n");
+    return;
+  }
+
+  // Divide in blocks of 64 bits
+  size_t n_blocks = 0;
+  uint64_t* blocks = string_to_blocks64(msg, &n_blocks);
+
+  for  (size_t i = 0; i < n_blocks; i++) {
+    g_print("Block %zu: 0x%016lX\n", i, blocks[i]);
+  }
+
+  free(blocks);
+}
+
+static void on_button_decode(GtkButton *btn, gpointer user_data) {
+  GtkComboBoxText *combo = GTK_COMBO_BOX_TEXT(user_data);
+  const char *option = gtk_combo_box_text_get_active_text(combo);
+
+
+  g_print("Decoding: %s\n", option);
+}
 
 int main(int argc, char *argv[]) {
   GtkWidget *window;
@@ -26,18 +77,43 @@ int main(int argc, char *argv[]) {
   gtk_container_set_border_width(GTK_CONTAINER(vbox), 8);
   gtk_container_add(GTK_CONTAINER(window), vbox);
 
-  // Combo Label
-  GtkWidget *combo_label = gtk_label_new("Selecciona una cadena para cifrar:");
-  gtk_box_pack_start(GTK_BOX(vbox), combo_label, FALSE, FALSE, 0);
+  // Encrypt Combo Label
+  GtkWidget *encrypt_combo_label = gtk_label_new("Selecciona una cadena para cifrar:");
+  gtk_box_pack_start(GTK_BOX(vbox), encrypt_combo_label, FALSE, FALSE, 0);
 
-  // Combo Box
-  GtkWidget *combo = gtk_combo_box_text_new();
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), "HOLA1234");
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), "Mensaje de prueba para TEA");
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combo), "Hello, World!");
-  gtk_combo_box_set_active(GTK_COMBO_BOX(combo), 0);
-  g_signal_connect(combo, "changed", G_CALLBACK(on_combo_changed), NULL);
-  gtk_box_pack_start(GTK_BOX(vbox), combo, FALSE, FALSE, 0);
+  // Combo Box for Encryption
+  GtkWidget *encrypt_combo = gtk_combo_box_text_new();
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(encrypt_combo), "HOLA1234");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(encrypt_combo), "Mensaje de prueba para TEA");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(encrypt_combo), "Hello, World!");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(encrypt_combo), 0);
+  gtk_box_pack_start(GTK_BOX(vbox), encrypt_combo, FALSE, FALSE, 0);
+
+  // Encrypt Button
+  GtkWidget *btn_encrypt = gtk_button_new_with_label("Encrypt");
+  g_signal_connect(btn_encrypt, "clicked", G_CALLBACK(on_button_encrypt), encrypt_combo);
+  gtk_box_pack_start(GTK_BOX(vbox), btn_encrypt, FALSE, FALSE, 0);
+
+  // Separator
+  GtkWidget *sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+  gtk_box_pack_start(GTK_BOX(vbox), sep, FALSE, FALSE, 0);
+
+  // Decode Combo Label
+  GtkWidget *decode_combo_label = gtk_label_new("Selecciona una cadena para descifrar:");
+  gtk_box_pack_start(GTK_BOX(vbox), decode_combo_label, FALSE, FALSE, 0);
+
+  // Combo Box for Encryption
+  GtkWidget *decode_combo = gtk_combo_box_text_new();
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(decode_combo), "HOLA1234");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(decode_combo), "Mensaje de prueba para TEA");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(decode_combo), "Hello, World!");
+  gtk_combo_box_set_active(GTK_COMBO_BOX(decode_combo), 0);
+  gtk_box_pack_start(GTK_BOX(vbox), decode_combo, FALSE, FALSE, 0);
+
+  // Encrypt Button
+  GtkWidget *btn_decode = gtk_button_new_with_label("Decode");
+  g_signal_connect(btn_decode, "clicked", G_CALLBACK(on_button_decode), decode_combo);
+  gtk_box_pack_start(GTK_BOX(vbox), btn_decode, FALSE, FALSE, 0);
 
   // Show window's widgets
   gtk_widget_show_all(window);
