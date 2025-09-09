@@ -1,7 +1,7 @@
 #include <stdint.h>
 
 // Assembly function declaration
-// extern void tea_encrypt(uint32_t v[2], const uint32_t key[4]);
+extern void tea_encrypt(uint32_t v[2], const uint32_t key[4]);
 
 // Simple implementation of basic functions since we're in bare-metal environment
 void print_char(char c) {
@@ -183,6 +183,21 @@ void main(int argc, char *argv[]) {
   // Divide in blocks of 64 bits
   int n_blocks = 0;
   uint64_t *blocks = string_to_blocks64(padded, padded_len, &n_blocks);
+
+  // Encrypt blocks
+  for (int i = 0; i < n_blocks; i++) {
+    uint64_t block = blocks[i];
+    uint32_t v[2];
+    v[0] = (uint32_t)(block >> 32);
+    v[1] = (uint32_t)(block & 0xFFFFFFFF);
+
+    tea_encrypt(v, key);
+    uint64_t encoded_block = ((uint64_t)v[0] << 32) | v[1];
+  
+    print_string("Encrypted block: ");
+    print_hex64(encoded_block);
+    print_char('\n');
+  }
 
   // Debug
   for (int i = 0; i < n_blocks; i++) {

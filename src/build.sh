@@ -38,21 +38,21 @@ if [ $? -ne 0 ]; then
 fi
 
 # Compile math assembly source to object file
-# riscv64-unknown-elf-gcc \
-#     -march=rv32im \
-#     -mabi=ilp32 \
-#     -nostdlib \
-#     -ffreestanding \
-#     -g3 \
-#     -gdwarf-4 \
-#     -c \
-#     math_asm.s \
-#     -o math_asm.o
+riscv64-unknown-elf-gcc \
+    -march=rv32im \
+    -mabi=ilp32 \
+    -nostdlib \
+    -ffreestanding \
+    -g3 \
+    -gdwarf-4 \
+    -c \
+    tea_encrypt.s \
+    -o tea_encrypt.o
 
-# if [ $? -ne 0 ]; then
-#     echo "Math assembly compilation failed"
-#     exit 1
-# fi
+if [ $? -ne 0 ]; then
+    echo "Math assembly compilation failed"
+    exit 1
+fi
 
 # Link object files together
 riscv64-unknown-elf-gcc \
@@ -64,6 +64,7 @@ riscv64-unknown-elf-gcc \
     -gdwarf-4 \
     startup.o \
     main.o \
+    tea_encrypt.o \
     -T linker.ld \
     -o program.elf
 
