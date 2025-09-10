@@ -1,7 +1,8 @@
 #include <stdint.h>
 
-// Assembly function declaration
+// Assembly functions declaration
 extern void tea_encrypt(uint32_t v[2], const uint32_t key[4]);
+extern void tea_decrypt(uint32_t v[2], const uint32_t key[4]);
 
 // Simple implementation of basic functions since we're in bare-metal environment
 void print_char(char c) {
@@ -161,10 +162,31 @@ uint64_t* string_to_blocks64(const uint8_t *bytes, int len, int *out_blocks) {
   return blocks;
 }
 
+void print_ascii_from_blocks(uint64_t *blocks, int n_blocks) {
+  for (int i = 0; i < n_blocks; i++) {
+    uint32_t v0 = (uint32_t)(blocks[i] >> 32);
+    uint32_t v1 = (uint32_t)(blocks[i] & 0xFFFFFFFF);
+
+    // big-endian → extract 4 bytes from v0 and v1
+    for (int j = 3; j >= 0; j--) {
+      char c = (char)((v0 >> (8*j)) & 0xFF);
+      if (c != '\0') {
+          print_char(c);
+      }
+    }
+    for (int j = 3; j >= 0; j--) {
+      char c = (char)((v1 >> (8*j)) & 0xFF);
+      if (c != '\0') {
+          print_char(c);
+      }
+    }
+  }
+  print_char('\n');
+}
 
 void main(int argc, char *argv[]) {
   // Key
-  const uint32_t key[4] = {0x01234567, 0x89ABCDEF, 0xFEDCBA98, 0x76543210};
+  const uint32_t key[4] = {0x12345678, 0x9ABCDEF0, 0xFEDCBA98, 0x76543210};
 
   // String
   const char* str = "HOLA1234";
@@ -172,7 +194,12 @@ void main(int argc, char *argv[]) {
   // Program Header
   print_string("=== Tiny Encryption Algorithm (TEA) ===\n");
 
-  // ASCII to Bytes
+  // Encoding section
+  print_string("Encoding string: ");
+  print_string(str);
+  print_char('\n');
+
+  // Transform ASCII to Bytes
   uint8_t *bytes = (uint8_t *)str;
   int len = strlen(str);
 
@@ -185,6 +212,7 @@ void main(int argc, char *argv[]) {
   uint64_t *blocks = string_to_blocks64(padded, padded_len, &n_blocks);
 
   // Encrypt blocks
+  uint64_t *encoded_blocks = malloc(n_blocks * sizeof(uint64_t));
   for (int i = 0; i < n_blocks; i++) {
     uint64_t block = blocks[i];
     uint32_t v[2];
@@ -192,22 +220,42 @@ void main(int argc, char *argv[]) {
     v[1] = (uint32_t)(block & 0xFFFFFFFF);
 
     tea_encrypt(v, key);
-    uint64_t encoded_block = ((uint64_t)v[0] << 32) | v[1];
+    encoded_blocks[i] = ((uint64_t)v[0] << 32) | v[1];
   
-    print_string("Encrypted block: ");
-    print_hex64(encoded_block);
-    print_char('\n');
-  }
-
-  // Debug
-  for (int i = 0; i < n_blocks; i++) {
-    print_string("Block ");
+    // Show result
+    print_string("Encrypted block ");
     print_number(i);
     print_string(": ");
-    print_hex64(blocks[i]);
+    print_hex64(encoded_blocks[i]);
     print_char('\n');
   }
 
+  // Decrypt blocks
+  uint64_t *decoded_blocks = malloc(n_blocks * sizeof(uint64_t));
+  for (int i = 0; i < n_blocks; i++) {
+    uint32_t v[2];
+    v[0] = (uint32_t)(encoded_blocks[i] >> 32);
+    v[1] = (uint32_t)(encoded_blocks[i] & 0xFFFFFFFF);
+
+    tea_decrypt(v, key);
+    decoded_blocks[i] = ((uint64_t)v[0] << 32) | v[1];
+
+    // Show result
+    print_string("Decoded block ");
+    print_number(i);
+    print_string(": ");
+    print_hex64(decoded_blocks[i]);
+    print_char('\n');
+  }
+
+  // Compare result
+  uint8_t *decoded_bytes = malloc(padded_len);
+  print_string("Decoded string (ASCII): ");
+  print_ascii_from_blocks(decoded_blocks, n_blocks);
+  print_char('\n');
+  print_string("Original string: ");
+  print_string(str);
+  print_char('\n');
 
   // Infinite loop to keep program running
   while (1) {
