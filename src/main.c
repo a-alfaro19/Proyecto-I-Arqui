@@ -185,11 +185,19 @@ void print_ascii_from_blocks(uint64_t *blocks, int n_blocks) {
 }
 
 void main(int argc, char *argv[]) {
+  /* Test 1 - Single Block */
+  // // Key
+  // const uint32_t key[4] = {0x12345678, 0x9ABCDEF0, 0xFEDCBA98, 0x76543210};
+
+  // // String
+  // const char* str = "HOLA1234";
+
+  /* Test 2 - Multiple Blocks */
   // Key
-  const uint32_t key[4] = {0x12345678, 0x9ABCDEF0, 0xFEDCBA98, 0x76543210};
+  const uint32_t key[4] = {0xA1B2C3D4, 0x5E6F7788, 0x99ABCDEF, 0x01234567};
 
   // String
-  const char* str = "HOLA1234";
+  const char* str = "Mensaje de prueba para TEA";
 
   // Program Header
   print_string("=== Tiny Encryption Algorithm (TEA) ===\n");
