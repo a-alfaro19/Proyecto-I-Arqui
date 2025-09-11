@@ -6,6 +6,8 @@
 # a0: Address of the data block (v)
 # a1: Address of the encryption key (key)
 
+.section .text
+.globl tea_decrypt
 tea_decrypt:
   # --- Reserve stack and save s-regs ---
   addi    sp, sp, -32
